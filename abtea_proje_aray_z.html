@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABTEA - Yapay Zeka Destekli Akıllı Bölgesel Tedarik ve Eşleştirme Ağı</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#1b3b2b',   /* Koyu Yeşil */
+                            DEFAULT: '#2d5a41',
+                            light: '#4a8262',
+                            cream: '#f9f6f0',  /* Krem arka plan */
+                            sand: '#e8dfd1',   /* Toprak / Kum tonu */
+                            accent: '#c27803', /* Turuncu / Vurgu */
+                            warm: '#d4a373'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(232, 223, 209, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-brand-cream text-gray-800 h-full flex flex-col antialiased selection:bg-brand-light selection:text-white">
+
+    <header class="bg-brand-dark text-brand-cream shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-accent flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        ABTEA <span class="text-xs px-2 py-0.5 rounded-full bg-brand-accent text-white uppercase tracking-wider font-semibold">Tübitak Projesi</span>
+                    </h1>
+                    <p class="text-xs text-brand-sand opacity-90">İstanbul & Şanlıurfa Yapay Zeka Destekli Tedarik Ağı</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-lg transition text-white bg-brand shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line"></i> Fiyat Makası & Erken Uyarı
+                </button>
+                <button onclick="switchTab('ai-route')" id="nav-ai-route" class="px-4 py-2 rounded-lg transition text-brand-sand hover:text-white hover:bg-brand/50 flex items-center gap-2">
+                    <i class="fa-solid fa-brain"></i> AI Talep & Rota Optimizasyonu
+                </button>
+                <button onclick="switchTab('pool')" id="nav-pool" class="px-4 py-2 rounded-lg transition text-brand-sand hover:text-white hover:bg-brand/50 flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping"></i> Kooperatif Ortak Havuz
+                </button>
+            </nav>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-900/60 text-emerald-300 border border-emerald-700">
+                    <span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sistem Aktif
+                </span>
+            </div>
+        </div>
+        <!-- Mobile Nav bar -->
+        <div class="md:hidden flex border-t border-brand/40 bg-brand-dark/95 px-2 py-2 justify-around text-xs font-medium">
+            <button onclick="switchTab('dashboard')" id="m-nav-dashboard" class="px-3 py-1.5 rounded text-white bg-brand flex flex-col items-center gap-1">
+                <i class="fa-solid fa-chart-line"></i> Fiyat Analizi
+            </button>
+            <button onclick="switchTab('ai-route')" id="m-nav-ai-route" class="px-3 py-1.5 rounded text-brand-sand flex flex-col items-center gap-1">
+                <i class="fa-solid fa-brain"></i> AI Rota
+            </button>
+            <button onclick="switchTab('pool')" id="m-nav-pool" class="px-3 py-1.5 rounded text-brand-sand flex flex-col items-center gap-1">
+                <i class="fa-solid fa-basket-shopping"></i> Ortak Havuz
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- TAB 1: Fiyat Makası ve Erken Uyarı Paneli -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-brand-dark to-brand rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10 max-w-2xl">
+                    <span class="text-xs font-semibold tracking-wider uppercase bg-brand-accent/30 text-brand-accent px-3 py-1 rounded-full border border-brand-accent/40">Canlı Analiz Paneli</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold mt-3 mb-2">İstanbul & Şanlıurfa Fiyat Makası Raporu</h2>
+                    <p class="text-brand-sand text-sm sm:text-base leading-relaxed">
+                        Yapay zeka modellerimiz iki şehir arasındaki aracı marjlarını, lojistik maliyetlerini ve pazar enflasyonunu anlık tarar. Fiyat makasının 2 katını aştığı kritik ürünlerde sistem proaktif erken uyarı üretir.
+                    </p>
+                </div>
+                <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/10">
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
+                        <div class="text-brand-sand text-xs">Ortalama Fiyat Makası</div>
+                        <div class="text-2xl font-bold text-amber-300 mt-1">2.28 Kat</div>
+                        <div class="text-xs text-emerald-300 mt-1"><i class="fa-solid fa-arrow-trend-down">}</i> -0.15 son hafta</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
+                        <div class="text-brand-sand text-xs">Aktif Ürün Takibi</div>
+                        <div class="text-2xl font-bold text-white mt-1">24 Kalem</div>
+                        <div class="text-xs text-brand-sand mt-1">Temel Gıda & Sebze</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
+                        <div class="text-brand-sand text-xs">Aktif AI Uyarıları</div>
+                        <div class="text-2xl font-bold text-rose-400 mt-1">5 Kritik</div>
+                        <div class="text-xs text-rose-200 mt-1">Tedarik öneriliyor</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-3 sm:p-4">
+                        <div class="text-brand-sand text-xs">Tasarruf Oranı</div>
+                        <div class="text-2xl font-bold text-emerald-400 mt-1">%42</div>
+                        <div class="text-xs text-emerald-200 mt-1">Doğrudan kooperatifle</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Erken Uyarı Bildirim Kutusu -->
+            <div class="bg-amber-50 border-l-4 border-amber-600 rounded-xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-600 text-xl mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-amber-900 text-sm sm:text-base">Yapay Zeka Erken Uyarı Sistemi (Anomali Tespiti)</h4>
+                        <p class="text-xs sm:text-sm text-amber-800 mt-1">
+                            <strong>İpek Biber/İsot</strong> ve <strong>Domates</strong> ürünlerinde İstanbul semt pazarlarında fiyatlar Şanlıurfa taban fiyatının sırasıyla <strong>2.4x</strong> ve <strong>2.1x</strong> katına ulaştı. AI Akıllı Rota motoru devreye sokularak doğrudan Şanlıurfa üretici kooperatifinden sevkiyat önerilir.
+                        </p>
+                    </div>
+                    <button onclick="switchTab('ai-route')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition">
+                        Rotayı Gör <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fiyat Karşılaştırma Tablosu -->
+            <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Pazar Fiyat Karşılaştırma Matrisi</h3>
+                        <p class="text-xs text-gray-500">Şanlıurfa hal/üretici fiyatları ile İstanbul semt pazarı ortalamaları</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-64">
+                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                            <input type="text" id="productSearch" onkeyup="filterProducts()" placeholder="Ürün ara (örn. Domates)..." class="w-full pl-9 pr-4 py-2 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand">
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="priceTable">
+                        <thead>
+                            <tr class="bg-brand-sand/55 text-xs font-semibold text-brand-dark uppercase tracking-wider">
+                                <th class="p-4">Tarım Ürünü</th>
+                                <th class="p-4">Şanlıurfa Üretici/Hal</th>
+                                <th class="p-4">İstanbul Semt Pazarı</th>
+                                <th class="p-4">Fiyat Makası</th>
+                                <th class="p-4">AI Durum / Tavsiye</th>
+                                <th class="p-4 text-right">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-xs sm:text-sm font-medium text-gray-700">
+                            <!-- Rows inserted dynamically or rendered statically -->
+                            <tr class="hover:bg-brand-cream/60 transition">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold">🍅</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Salkım Domates (Kg)</div>
+                                        <div class="text-xs text-gray-400">Hal Kaydı: Harran</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-brand-dark">18.50 ₺</td>
+                                <td class="p-4 font-semibold text-gray-900">42.00 ₺</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">2.27x Kritik</span>
+                                </td>
+                                <td class="p-4 text-xs text-amber-700 flex items-center gap-1.5 pt-5">
+                                    <i class="fa-solid fa-robot"></i> Direkt Sevkiyat Önerilir
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button onclick="quickOrder('Salkım Domates', 18.50)" class="px-3 py-1.5 bg-brand text-white rounded-lg text-xs hover:bg-brand-light transition shadow-sm">
+                                        Havuza Ekle
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-brand-cream/60 transition">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">🌶️</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Kırmızı İsot Biberi (Kg)</div>
+                                        <div class="text-xs text-gray-400">Hal Kaydı: Eyyübiye</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-brand-dark">65.00 ₺</td>
+                                <td class="p-4 font-semibold text-gray-900">160.00 ₺</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">2.46x Kritik</span>
+                                </td>
+                                <td class="p-4 text-xs text-amber-700 flex items-center gap-1.5 pt-5">
+                                    <i class="fa-solid fa-robot"></i> Yüksek Marj - Fırsat
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button onclick="quickOrder('Kırmızı İsot Biberi', 65.00)" class="px-3 py-1.5 bg-brand text-white rounded-lg text-xs hover:bg-brand-light transition shadow-sm">
+                                        Havuza Ekle
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-brand-cream/60 transition">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold">🥔</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Taze Patates (Kg)</div>
+                                        <div class="text-xs text-gray-400">Hal Kaydı: Siverek</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-brand-dark">12.00 ₺</td>
+                                <td class="p-4 font-semibold text-gray-900">25.00 ₺</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">2.08x Normal</span>
+                                </td>
+                                <td class="p-4 text-xs text-emerald-700 flex items-center gap-1.5 pt-5">
+                                    <i class="fa-solid fa-circle-check"></i> Stabil Seyir
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button onclick="quickOrder('Taze Patates', 12.00)" class="px-3 py-1.5 bg-brand text-white rounded-lg text-xs hover:bg-brand-light transition shadow-sm">
+                                        Havuza Ekle
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-brand-cream/60 transition">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">🧅</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Kuru Soğan (Kg)</div>
+                                        <div class="text-xs text-gray-400">Hal Kaydı: Viranşehir</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-brand-dark">10.00 ₺</td>
+                                <td class="p-4 font-semibold text-gray-900">22.00 ₺</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">2.20x Normal</span>
+                                </td>
+                                <td class="p-4 text-xs text-emerald-700 flex items-center gap-1.5 pt-5">
+                                    <i class="fa-solid fa-circle-check"></i> Planlı Sevkiyat Uygun
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button onclick="quickOrder('Kuru Soğan', 10.00)" class="px-3 py-1.5 bg-brand text-white rounded-lg text-xs hover:bg-brand-light transition shadow-sm">
+                                        Havuza Ekle
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-brand-cream/60 transition">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold">🌾</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Mercimek (Kırmızı - Kg)</div>
+                                        <div class="text-xs text-gray-400">Hal Kaydı: Akçakale</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-brand-dark">30.00 ₺</td>
+                                <td class="p-4 font-semibold text-gray-900">65.00 ₺</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">2.16x Normal</span>
+                                </td>
+                                <td class="p-4 text-xs text-emerald-700 flex items-center gap-1.5 pt-5">
+                                    <i class="fa-solid fa-circle-check"></i> Depolamaya Uygun
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button onclick="quickOrder('Kırmızı Mercimek', 30.00)" class="px-3 py-1.5 bg-brand text-white rounded-lg text-xs hover:bg-brand-light transition shadow-sm">
+                                        Havuza Ekle
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: AI Talep ve Rota Optimizasyonu -->
+        <section id="tab-ai-route" class="space-y-6 hidden">
+            <div class="bg-gradient-to-r from-brand to-brand-light rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+                <span class="text-xs font-semibold tracking-wider uppercase bg-white/20 px-3 py-1 rounded-full">Yapay Zeka Karar Destek Motoru</span>
+                <h2 class="text-2xl sm:text-3xl font-bold mt-3 mb-2">Tersine Lojistik & Rota Optimizasyonu</h2>
+                <p class="text-brand-cream text-sm sm:text-base leading-relaxed max-w-3xl">
+                    İstanbul'dan Anadolu'ya boş dönen tır filolarının rotaları analiz edilir. Şanlıurfa'daki üretici kooperatiflerinin hasat zamanı ile İstanbul semt kooperatiflerinin ortak talepleri yapay zeka algoritması (LSTM zaman serisi ve Dijkstra rota optimizasyonu) ile eşleştirilir.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sol Kolon: Simülasyon Kontrolleri -->
+                <div class="glass-card rounded-2xl p-6 space-y-4 lg:col-span-1 shadow-sm">
+                    <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-brand"></i> AI Simülasyon Parametreleri
+                    </h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Hedef Ürün Grubu</label>
+                        <select id="aiProductSelect" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            <option>Salkım Domates (Harran Üretim Kooperatifi)</option>
+                            <option>Kırmızı İsot Biberi (Eyyübiye Kooperatifi)</option>
+                            <option>Taze Patates (Siverek Tarım Birlik)</option>
+                            <option>Kırmızı Mercimek (Akçakale Hububat)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">İstanbul Dağıtım Noktası</label>
+                        <select id="aiDestSelect" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                            <option>Kadıköy Tüketici Kooperatifi Ağı (3 Mahalle)</option>
+                            <option>Beşiktaş Semt İnisiyatifi Havuzu</option>
+                            <option>Şişli Dayanışma Pazarı</option>
+                            <option>Üsküdar Ortak Tüketim Birliği</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Planlanan Sevkiyat Miktarı (Kg)</label>
+                        <input type="number" id="aiAmount" value="2500" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                    </div>
+                    <button onclick="runAISimulation()" class="w-full py-3 bg-brand text-white rounded-xl font-semibold text-xs hover:bg-brand-light transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-microchip"></i> AI Rota ve Maliyet Hesapla
+                    </button>
+                </div>
+
+                <!-- Sağ Kolon: Simülasyon Sonuç / Harita Görselleştirmesi -->
+                <div class="glass-card rounded-2xl p-6 lg:col-span-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                            <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-map-location-dot text-brand"></i> Rota ve Lojistik Simülasyon Raporu
+                            </h3>
+                            <span id="simStatusBadge" class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">Hazır</span>
+                        </div>
+                        
+                        <!-- Rota İllüstrasyonu -->
+                        <div class="my-6 p-4 bg-brand-dark rounded-xl text-white flex flex-col sm:flex-row items-center justify-around gap-4 text-center">
+                            <div class="space-y-1">
+                                <div class="text-xs text-brand-sand">Çıkış Noktası</div>
+                                <div class="font-bold text-base">Şanlıurfa (Harran Tarlaları)</div>
+                                <div class="text-[10px] text-emerald-400">Üretici Fiyatı: Tabanda</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="text-xs text-brand-sand mb-1">Tersine Lojistik (1.280 km)</div>
+                                <div class="w-32 h-0.5 bg-brand-accent relative flex items-center justify-center">
+                                    <i class="fa-solid fa-truck-fast text-brand-accent absolute bg-brand-dark px-1 text-sm"></i>
+                                </div>
+                                <div class="text-[10px] text-amber-300 mt-1">Boş Dönüş Tırı Eşleşmesi (%35 Tasarruf)</div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-xs text-brand-sand">Varış Noktası</div>
+                                <div class="font-bold text-base">İstanbul (Kooperatif Hub)</div>
+                                <div class="text-[10px] text-emerald-400">Aracı Karı Sıfırlandı</div>
+                            </div>
+                        </div>
+
+                        <!-- Metrik Sonuçlar Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-brand-cream/70 rounded-xl p-3 border border-brand-sand">
+                                <div class="text-xs text-gray-500">Klasik Tedarik Maliyeti</div>
+                                <div id="classicCost" class="text-lg font-bold text-gray-800 mt-1">105,000 ₺</div>
+                            </div>
+                            <div class="bg-brand-cream/70 rounded-xl p-3 border border-brand-sand">
+                                <div class="text-xs text-gray-500">ABTEA AI Tedarik Maliyeti</div>
+                                <div id="aiCost" class="text-lg font-bold text-brand-dark mt-1">61,250 ₺</div>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-200 col-span-2 sm:col-span-1">
+                                <div class="text-xs text-emerald-700 font-medium">Toplam Tasarruf</div>
+                                <div id="savingAmount" class="text-lg font-bold text-emerald-800 mt-1">%41.6 (43,750 ₺)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-200 flex items-center justify-between">
+                        <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info text-brand"></i> Rota optimizasyonu anlık yakıt, otoyol ve boş tır doluluk oranına göre hesaplanmıştır.</p>
+                        <button onclick="switchTab('pool')" class="px-4 py-2 bg-brand-accent text-white rounded-xl text-xs font-semibold hover:bg-amber-700 transition">
+                            Ortak Havuza Siparisi Aktar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Kooperatif Ortak Havuz ve Ön Sipariş Arayüzü -->
+        <section id="tab-pool" class="space-y-6 hidden">
+            <div class="bg-gradient-to-r from-brand-dark to-brand rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+                <span class="text-xs font-semibold tracking-wider uppercase bg-brand-accent/30 text-brand-accent px-3 py-1 rounded-full border border-brand-accent/40">Topluluk Odaklı Ticaret</span>
+                <h2 class="text-2xl sm:text-3xl font-bold mt-3 mb-2">Kooperatif Ortak Havuz ve Ön Sipariş Yönetimi</h2>
+                <p class="text-brand-sand text-sm sm:text-base leading-relaxed max-w-3xl">
+                    İstanbul'daki mahalle kooperatiflerinin haftalık ortak taleplerini birleştirdiği havuzdur. Şanlıurfa'daki üreticiler ürünlerini doğrudan bu kesin siparişe göre hasat eder; zayiat sıfıra iner.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sol Kolon: Yeni Sipariş Ekle -->
+                <div class="glass-card rounded-2xl p-6 space-y-4 lg:col-span-1 shadow-sm">
+                    <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus text-brand"></i> Havuza Yeni Ürün Talebi Ekle
+                    </h3>
+                    <form id="poolForm" onsubmit="addPoolItem(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Ürün Adı</label>
+                            <input type="text" id="poolItemName" required placeholder="Örn: Urfa Domatesi" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Talep Edilen Miktar (Kg)</label>
+                            <input type="number" id="poolItemQty" required value="500" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Hedeflenen Üretici / Bölge</label>
+                            <input type="text" id="poolItemSource" required value="Harran Üretici Kooperatifi" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Birim Fiyat (₺ / Kg)</label>
+                            <input type="number" step="0.01" id="poolItemPrice" required value="18.50" class="w-full p-2.5 text-xs bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand font-medium">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-brand text-white rounded-xl font-semibold text-xs hover:bg-brand-light transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-basket-shopping"></i> Ortak Havuza Ekle
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Sağ Kolon: Aktif Ortak Havuz Listesi -->
+                <div class="glass-card rounded-2xl p-6 lg:col-span-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-200 mb-4">
+                            <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-brand"></i> Aktif Ortak Havuz Durumu
+                            </h3>
+                            <span class="text-xs font-medium text-gray-500" id="poolCountText">Toplam 3 aktif talep</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse" id="poolTable">
+                                <thead>
+                                    <tr class="bg-brand-sand/55 text-xs font-semibold text-brand-dark uppercase tracking-wider">
+                                        <th class="p-3">Ürün</th>
+                                        <th class="p-3">Miktar</th>
+                                        <th class="p-3">Üretici Bölge</th>
+                                        <th class="p-3">Birim Fiyat</th>
+                                        <th class="p-3">Toplam Tutar</th>
+                                        <th class="p-3 text-right">Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 text-xs sm:text-sm font-medium text-gray-700" id="poolTableBody">
+                                    <tr>
+                                        <td class="p-3 font-semibold text-gray-900">Salkım Domates</td>
+                                        <td class="p-3">1,200 Kg</td>
+                                        <td class="p-3 text-gray-600">Harran Tarım Koop.</td>
+                                        <td class="p-3">18.50 ₺</td>
+                                        <td class="p-3 font-bold text-brand-dark">22,200 ₺</td>
+                                        <td class="p-3 text-right">
+                                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Toplanıyor (%80)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-gray-900">Kırmızı İsot Biberi</td>
+                                        <td class="p-3">450 Kg</td>
+                                        <td class="p-3 text-gray-600">Eyyübiye Üreticileri</td>
+                                        <td class="p-3">65.00 ₺</td>
+                                        <td class="p-3 font-bold text-brand-dark">29,250 ₺</td>
+                                        <td class="p-3 text-right">
+                                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800">Doldu / Sevkiyatta</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-gray-900">Taze Patates</td>
+                                        <td class="p-3">3,000 Kg</td>
+                                        <td class="p-3 text-gray-600">Siverek Kooperatifi</td>
+                                        <td class="p-3">12.00 ₺</td>
+                                        <td class="p-3 font-bold text-brand-dark">36,000 ₺</td>
+                                        <td class="p-3 text-right">
+                                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Toplanıyor (%95)</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-200 bg-brand-cream/50 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500">Ortak Havuz Toplam Hacim</div>
+                            <div class="text-lg font-bold text-brand-dark" id="totalPoolSum">87,450 ₺</div>
+                        </div>
+                        <button onclick="finalizePoolOrder()" class="w-full sm:w-auto px-5 py-2.5 bg-brand text-white rounded-xl text-xs font-semibold hover:bg-brand-light transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-truck-ramp-box"></i> Havuzu Şanlıurfa'ya Sipariş Olarak Geç
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-brand-dark text-brand-sand py-6 mt-12 border-t border-brand/40 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg bg-brand-accent flex items-center justify-center text-white font-bold text-xs">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <span>ABTEA - Yapay Zeka Destekli Bölgesel Tedarik ve Eşleştirme Projesi</span>
+            </div>
+            <div class="text-center sm:text-right opacity-80">
+                Tübitak Lise/Üniversite Araştırma Projeleri Yarışması Taslağı © 2026
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching logic
+        function switchTab(tabId) {
+            const tabs = ['dashboard', 'ai-route', 'pool'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                const mNav = document.getElementById(`m-nav-${t}`);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    if(nav) {
+                        nav.className = "px-4 py-2 rounded-lg transition text-white bg-brand shadow-sm flex items-center gap-2";
+                    }
+                    if(mNav) {
+                        mNav.className = "px-3 py-1.5 rounded text-white bg-brand flex flex-col items-center gap-1";
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    if(nav) {
+                        nav.className = "px-4 py-2 rounded-lg transition text-brand-sand hover:text-white hover:bg-brand/50 flex items-center gap-2";
+                    }
+                    if(mNav) {
+                        mNav.className = "px-3 py-1.5 rounded text-brand-sand flex flex-col items-center gap-1";
+                    }
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Product search filter in price table
+        function filterProducts() {
+            let input = document.getElementById('productSearch').value.toLowerCase();
+            let table = document.getElementById('priceTable');
+            let trs = table.getElementsByTagName('tr');
+            for (let i = 1; i < trs.length; i++) {
+                let td = trs[i].getElementsByTagName('td')[0];
+                if (td) {
+                    let txt = td.textContent || td.innerText;
+                    trs[i].style.display = txt.toLowerCase().indexOf(input) > -1 ? "" : "none";
+                }
+            }
+        }
+
+        // Quick order from price table to pool
+        function quickOrder(productName, price) {
+            document.getElementById('poolItemName').value = productName;
+            document.getElementById('poolItemPrice').value = price;
+            switchTab('pool');
+            showToast(`${productName} ortak havuz formuna aktarıldı!`);
+        }
+
+        // AI Simulation run logic
+        function runAISimulation() {
+            const amount = parseFloat(document.getElementById('aiAmount').value) || 2500;
+            const product = document.getElementById('aiProductSelect').value;
+            
+            // Base price estimation
+            let basePrice = 20;
+            if(product.includes('İsot')) basePrice = 65;
+            else if(product.includes('Patates')) basePrice = 12;
+            else if(product.includes('Mercimek')) basePrice = 30;
+
+            const classicTotal = amount * (basePrice * 2.3);
+            const aiTotal = amount * basePrice * 1.35; // lojistik dahil
+            const saving = classicTotal - aiTotal;
+            const savingPct = ((saving / classicTotal) * 100).toFixed(1);
+
+            document.getElementById('classicCost').innerText = classicTotal.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
+            document.getElementById('aiCost').innerText = aiTotal.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' ₺';
+            document.getElementById('savingAmount').innerText = `%${savingPct} (${saving.toLocaleString('tr-TR', {maximumFractionDigits:0})} ₺)`;
+            
+            const badge = document.getElementById('simStatusBadge');
+            badge.innerText = "Optimize Edildi";
+            badge.className = "px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold animate-pulse";
+            
+            showToast("Yapay zeka rota ve maliyet optimizasyonu başarıyla hesaplandı!");
+        }
+
+        // Add item to pool table
+        let poolItemsCount = 3;
+        function addPoolItem(e) {
+            e.preventDefault();
+            const name = document.getElementById('poolItemName').value;
+            const qty = parseFloat(document.getElementById('poolItemQty').value);
+            const source = document.getElementById('poolItemSource').value;
+            const price = parseFloat(document.getElementById('poolItemPrice').value);
+            const total = qty * price;
+
+            const tbody = document.getElementById('poolTableBody');
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-brand-cream/60 transition";
+            tr.innerHTML = `
+                <td class="p-3 font-semibold text-gray-900">${name}</td>
+                <td class="p-3">${qty.toLocaleString('tr-TR')} Kg</td>
+                <td class="p-3 text-gray-600">${source}</td>
+                <td class="p-3">${price.toFixed(2)} ₺</td>
+                <td class="p-3 font-bold text-brand-dark">${total.toLocaleString('tr-TR', {maximumFractionDigits:2})} ₺</td>
+                <td class="p-3 text-right">
+                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">Yeni Eklendi (%15)</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            poolItemsCount++;
+            document.getElementById('poolCountText').innerText = `Toplam ${poolItemsCount} aktif talep`;
+            
+            // Recalculate total sum
+            updatePoolSum(total);
+            document.getElementById('poolForm').reset();
+            showToast("Ürün başarıyla ortak havuza eklendi!");
+        }
+
+        let currentPoolSum = 87450;
+        function updatePoolSum(addedVal) {
+            currentPoolSum += addedVal;
+            document.getElementById('totalPoolSum').innerText = currentPoolSum.toLocaleString('tr-TR', {maximumFractionDigits:2}) + ' ₺';
+        }
+
+        function finalizePoolOrder() {
+            showToast("Ortak havuz siparişleri Şanlıurfa kooperatiflerine iletildi! Hasat süreci başlatılıyor.");
+        }
+
+        // Custom notification toast
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 bg-brand-dark text-white px-5 py-3 rounded-xl shadow-2xl text-xs sm:text-sm font-medium z-50 flex items-center gap-3 border border-brand-light animate-bounce";
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i> <span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
